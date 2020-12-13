@@ -21,7 +21,7 @@ RUN set -ex \
     && ln -s /usr/bin/php-config7 /usr/local/bin/php-config \
     # install composer
     && cd /tmp \
-    && wget https://github.com/composer/composer/releases/download/${COMPOSER_VERSION}/composer.phar \
+    && wget https://mirrors.aliyun.com/composer/composer.phar \
     && chmod u+x composer.phar \
     && mv composer.phar /usr/local/bin/composer \
     && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/ \
