@@ -14,7 +14,7 @@ ENV TIMEZONE=${timezone:-"Asia/Shanghai"} \
 # update
 RUN set -ex \
     && apk update \
-    && apk add --no-cache libstdc++ openssl bash git zsh curl wget git \
+    && apk add --no-cache libstdc++ openssl bash git curl wget git \
     && apk add --no-cache $PHPIZE_DEPS libaio-dev openssl-dev \
     && apk add --no-cache php7-mongodb \
     && ln -s /usr/bin/phpize7 /usr/local/bin/phpize \
@@ -50,8 +50,8 @@ RUN set -ex \
     && make \
     && make install \
     # - oh my zsh
-    && cd /tmp \
-    && sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" \
+    # && cd /tmp \
+    # && sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" \
     # ---------- clear works ----------
     && rm -rf /var/cache/apk/* /tmp/* /usr/share/man \
     && echo -e "\033[42;37m Build Completed :).\033[0m\n"
