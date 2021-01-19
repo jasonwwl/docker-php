@@ -24,6 +24,7 @@ RUN set -ex \
     bcmath \
     gd \
     mysqli \
+    pdo_mysql \
     zip \
     sockets \
     opcache
@@ -53,3 +54,5 @@ RUN set -ex \
     && echo "post_max_size=128M" >> /usr/local/etc/php/conf.d/99_overrides.ini \
     && echo "date.timezone=Asia/Shanghai" >> /usr/local/etc/php/conf.d/99_overrides.ini \
     && php --ri swoole
+
+RUN php -m
