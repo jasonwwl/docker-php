@@ -17,7 +17,7 @@ RUN set -ex \
     # && echo "deb-src http://mirrors.aliyun.com/debian/ buster-backports main non-free contrib" >> /etc/apt/sources.list \
     # && echo "" >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y tzdata curl wget libcurl4-openssl-dev libxml2-dev libzip-dev zlib1g zlib1g-dev libpng-dev libonig-dev librdkafka-dev \
+    && apt-get install -y tzdata curl wget git libcurl4-openssl-dev libxml2-dev libzip-dev zlib1g zlib1g-dev libpng-dev libonig-dev librdkafka-dev \
     && ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata \
     && docker-php-ext-install -j$(nproc) \
