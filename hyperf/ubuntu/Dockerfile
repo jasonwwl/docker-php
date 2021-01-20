@@ -7,17 +7,8 @@ ENV TIMEZONE=${timezone:-"Asia/Shanghai"} \
     SCAN_CACHEABLE=(true)
 
 RUN set -ex \
-    # && echo "deb http://mirrors.aliyun.com/debian/ buster main non-free contrib" > /etc/apt/sources.list \
-    # && echo "deb http://mirrors.aliyun.com/debian-security buster/updates main" >> /etc/apt/sources.list \
-    # && echo "deb http://mirrors.aliyun.com/debian/ buster-updates main non-free contrib" >> /etc/apt/sources.list \
-    # && echo "deb http://mirrors.aliyun.com/debian/ buster-backports main non-free contrib" >> /etc/apt/sources.list \
-    # && echo "deb-src http://mirrors.aliyun.com/debian-security buster/updates main" >> /etc/apt/sources.list \
-    # && echo "deb-src http://mirrors.aliyun.com/debian/ buster main non-free contrib" >> /etc/apt/sources.list \
-    # && echo "deb-src http://mirrors.aliyun.com/debian/ buster-updates main non-free contrib" >> /etc/apt/sources.list \
-    # && echo "deb-src http://mirrors.aliyun.com/debian/ buster-backports main non-free contrib" >> /etc/apt/sources.list \
-    # && echo "" >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get install -y tzdata curl wget git libcurl4-openssl-dev libxml2-dev libzip-dev zlib1g zlib1g-dev libpng-dev libonig-dev librdkafka-dev \
+    && apt-get install -y tzdata curl wget git libcurl4-openssl-dev libxml2-dev libzip-dev zlib1g zlib1g-dev libpng-dev libonig-dev librdkafka-dev zlib1g-dev \
     && ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata \
     && docker-php-ext-install -j$(nproc) \
@@ -54,5 +45,15 @@ RUN set -ex \
     && echo "post_max_size=128M" >> /usr/local/etc/php/conf.d/99_overrides.ini \
     && echo "date.timezone=Asia/Shanghai" >> /usr/local/etc/php/conf.d/99_overrides.ini \
     && php --ri swoole
+
+RUN set -ex \
+    && curl -fsSL "https://pecl.php.net/get/xlswriter-1.3.7.tgz" -o xlswriter.tar.gz \
+    && mkdir -p /tmp/xlswriter \
+    && tar -xf xlswriter.tar.gz -C /tmp/xlswriter --strip-components=1 \
+    && rm xlswriter.tar.gz \
+    && docker-php-ext-configure /tmp/xlswriter --enable-reader \
+    && docker-php-ext-install -j$(nproc) /tmp/xlswriter \
+    && rm -r /tmp/xlswriter \
+    && php --ri xlswriter
 
 RUN php -m
