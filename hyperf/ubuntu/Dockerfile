@@ -35,7 +35,7 @@ RUN set -ex \
     && tar -xf swoole.tar.gz -C /tmp/swoole --strip-components=1 \
     && rm swoole.tar.gz \
     && apt-get update \
-    && apt-get install libssl-dev \
+    && apt-get install -y libssl-dev \
     && docker-php-ext-configure /tmp/swoole --enable-openssl --with-openssl-dir=/usr/include/openssl --enable-mysqlnd --enable-http2 --enable-swoole-json --enable-swoole-curl --enable-sockets \
     && docker-php-ext-install -j$(nproc) /tmp/swoole \
     && rm -r /tmp/swoole \
