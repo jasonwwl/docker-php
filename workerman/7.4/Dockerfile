@@ -19,13 +19,12 @@ RUN uname -a && \
 # Install php ext.
 RUN apt update && \
     apt-get remove -y libssl1.1 && \
-    apt-get install libssl1.1 krb5-locales libkrb5support0 libkrb5-3 libgssapi-krb5-2 libcurl4 curl zlib1g zlib1g-dev libonig-dev libpng-dev libzip-dev --allow-downgrades -y && \
+    apt-get install libssl1.1 libssl-dev krb5-locales libkrb5support0 libkrb5-3 libgssapi-krb5-2 libcurl4 libcurl4-openssl-dev curl zlib1g zlib1g-dev libonig-dev libpng-dev libzip-dev --allow-downgrades -y && \
     docker-php-ext-install bcmath gd zip sockets pcntl pdo_mysql -j$(nproc) && \
     pecl install redis && \
     docker-php-ext-enable redis && \
     pecl install mongodb && \
-    docker-php-ext-enable mongodb && \
-    apt-get install libssl-dev -y
+    docker-php-ext-enable mongodb
 
 ARG INSTALL_LIB_EVENT=true
 RUN if [ ${INSTALL_LIB_EVENT} = true ]; then \
