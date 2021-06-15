@@ -1,54 +1,47 @@
-FROM php:7.4-cli
+FROM php:7.4-fpm
 
-RUN uname -a && \
-    apt update
-# Change ubuntu source.
-# Reference: https://github.com/laradock/laradock
-# ARG UBUNTU_SOURCE=aliyun
-# ARG CHANGE_UBUNTU_SOURCE=true
-# COPY ./sources.sh /tmp/sources.sh
-# RUN if [ ${CHANGE_UBUNTU_SOURCE} = true ]; then \
-#     apt-get install -y gnupg2 && \
-#     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3B4FE6ACC0B21F32 && \
-#     chmod +x /tmp/sources.sh && \
-#     /bin/bash -c /tmp/sources.sh && \
-#     rm -rf /tmp/sources.sh && \
-#     apt update \
-# ;fi
+ENV TIMEZONE=${timezone:-"Asia/Shanghai"}
 
-# Install php ext.
-RUN apt update && \
-    apt-get remove -y libssl1.1 && \
-    apt-get install libssl1.1 libssl-dev krb5-locales libkrb5support0 libkrb5-3 libgssapi-krb5-2 libcurl4 libcurl4-openssl-dev curl zlib1g zlib1g-dev libonig-dev libpng-dev libzip-dev --allow-downgrades -y && \
-    docker-php-ext-install bcmath gd zip sockets pcntl pdo_mysql -j$(nproc) && \
-    pecl install redis && \
-    docker-php-ext-enable redis && \
-    pecl install mongodb && \
-    docker-php-ext-enable mongodb
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    libcurl4-openssl-dev \
+    libxml2-dev \
+    libzip-dev \
+    zlib1g \
+    zlib1g-dev \
+    libssl-dev
 
-ARG INSTALL_LIB_EVENT=true
-RUN if [ ${INSTALL_LIB_EVENT} = true ]; then \
-    apt-get install libevent-dev -y && \
-    pecl install event && \
-    echo extension=event.so > /usr/local/etc/php/conf.d/event.ini \
-;fi
+RUN apt-get update && apt-get install -y tzdata \
+    && ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && dpkg-reconfigure -f noninteractive tzdata
 
-# Install composer and set mirror.
-# Reference: https://pkg.phpcomposer.com/#how-to-install-composer
-# Referencr: https://developer.aliyun.com/composer
-ARG INSTALL_COMPOSER=true
-ARG COMPOSER_INSTALLER=https://install.phpcomposer.com/installer
-ARG COMPOSER_MIRROR=https://mirrors.aliyun.com/composer/
-RUN if [ ${INSTALL_COMPOSER} = true ]; then \
-    php -r "copy('${COMPOSER_INSTALLER}', 'composer-setup.php');" && \
-    php composer-setup.php && \
-    php -r "unlink('composer-setup.php');" && \
-    mv composer.phar /usr/local/bin/composer && \
-    composer config -g repo.packagist composer ${COMPOSER_MIRROR} \
-;fi
+RUN apt-get update && apt-get install -y \
+        libfreetype6-dev \
+        libjpeg62-turbo-dev \
+        libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd
 
+RUN docker-php-ext-install -j$(nproc) \
+    bcmath \
+    gd \
+    mysqli \
+    pdo_mysql \
+    zip \
+    sockets \
+    opcache \
+    posix \
+    pcntl
 
-RUN apt-get install git zip vim -y
+RUN pecl channel-update pecl.php.net \
+    && pecl install redis \
+    && docker-php-ext-enable redis
+
+RUN pecl channel-update pecl.php.net \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb
 
 RUN set -ex \
     && curl -fsSL "https://pecl.php.net/get/xlswriter-1.3.7.tgz" -o xlswriter.tar.gz \
@@ -60,4 +53,18 @@ RUN set -ex \
     && rm -r /tmp/xlswriter \
     && php --ri xlswriter
 
-RUN php -m
+RUN apt-get update && apt-get install -y \
+    libevent-dev \
+    && pecl channel-update pecl.php.net \
+    && pecl install event \
+    && docker-php-ext-enable event
+
+RUN set -ex \
+    # install composer
+    && cd /tmp \
+    && wget https://mirrors.aliyun.com/composer/composer.phar \
+    && chmod u+x composer.phar \
+    && mv composer.phar /usr/local/bin/composer \ 
+    && composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+
+RUN php -m && php -v
